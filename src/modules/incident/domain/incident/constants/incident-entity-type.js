@@ -1,0 +1,7 @@
+const INCIDENT_ENTITY_TYPES = {
+  PRODUCT: 'PRODUCT',
+  PARCEL: 'PARCEL',
+  ITEM: 'ITEM'
+};
+
+module.exports = { INCIDENT_ENTITY_TYPES };

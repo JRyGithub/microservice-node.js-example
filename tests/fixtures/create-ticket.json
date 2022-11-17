@@ -1,0 +1,156 @@
+{
+  "firstFixture": {
+    "parcel": {
+      "id": 868170120,
+      "type": "SHIPMENT",
+      "trackingId": "CUB868170120",
+      "status": "PICKED",
+      "aside": false,
+      "address": {
+        "line1": "1 IMPASSE DES FAUX",
+        "zip": "86240",
+        "city": "Iteuil",
+        "country": "FR"
+      },
+      "firstName": "LAURENT",
+      "lastName": "BARBAGLIA",
+      "phone": "681867184",
+      "email": "jeromelizon@packlink.fr",
+      "value": 0,
+      "deliveryMode": "colissimo",
+      "deliverySigned": false,
+      "objectCount": 1,
+      "insurance": 100,
+      "orderRef": "FR006H27N8315AC",
+      "createdAt": "2016-08-24T13:44:36.000Z",
+      "updatedAt": "2016-09-13T16:10:15.000Z",
+      "shippedAt": "2016-09-13T16:10:15.000Z",
+      "selfReturnActivated": false,
+      "customsCategory": "GIFT",
+      "originalValue": 0
+    },
+    "user": {
+      "id": 277206218,
+      "firstName": "Mathieu",
+      "lastName": "Lemaire",
+      "address": {
+        "line1": "27 rue du Chemin Vert",
+        "zip": "75011",
+        "city": "Paris",
+        "country": "FR"
+      },
+      "organizationName": "totox",
+      "phone": "0664543537",
+      "createdAt": "2016-08-10T08:16:49.000Z",
+      "updatedAt": "2016-08-10T08:16:49.000Z",
+      "email": "mathieu@cubyn.com",
+      "affiliateCode": "Lemaire-8YC16F4"
+    },
+    "collect": {
+      "id": 942069196,
+      "status": "PICKED",
+      "address": {
+        "line1": "27 rue du Chemin Vert",
+        "zip": "75011",
+        "city": "Paris",
+        "country": "FR"
+      },
+      "pickupAt": "2016-09-13T12:00:00.000Z",
+      "messengerType": "2-wheeled",
+      "contactPhone": "0664543537",
+      "contactName": "Lemaire Mathieu",
+      "createdAt": "2016-09-13T15:45:55.000Z",
+      "updatedAt": "2016-09-13T16:10:15.000Z"
+    },
+    "ticket": {
+      "comment": "lambda - damaged parcel",
+      "fileMap": {
+        "invoices": [{ "fileName": "cn.pdf", "s3Id": "uploads/cn" }],
+        "picturesOfTheDamage": [{ "fileName": "file.pdf", "s3Id": "uploads/file" }],
+        "identityParts": [],
+        "certificateOfNonReceipt": [],
+        "senderDisputeDeclaration": [],
+        "others": []
+      },
+      "requester": "metux@cubyn.com",
+      "collaborators": ["mathieu@cubyn.com"]
+    }
+  },
+  "secondFixture": {
+    "parcel": {
+      "id": 868170120,
+      "type": "SHIPMENT",
+      "trackingId": "CUB868170120",
+      "status": "PICKED",
+      "aside": false,
+      "address": {
+        "line1": "1 IMPASSE DES FAUX",
+        "zip": "86240",
+        "city": "Iteuil",
+        "country": "FR"
+      },
+      "carrierTrackingId": "6A11139254240",
+      "carrier": "colissimo",
+      "orderRef": "myBox321",
+      "firstName": "LAURENT",
+      "lastName": "BARBAGLIA",
+      "phone": "681867184",
+      "email": "jeromelizon@packlink.fr",
+      "value": 0,
+      "deliveryMode": "colissimo",
+      "deliverySigned": false,
+      "objectCount": 1,
+      "insurance": 100,
+      "orderRef": "FR006H27N8315AC",
+      "createdAt": "2016-08-24T13:44:36.000Z",
+      "updatedAt": "2016-09-13T16:10:15.000Z",
+      "pickedAt": "2016-09-13T16:10:15.000Z",
+      "selfReturnActivated": false,
+      "customsCategory": "GIFT",
+      "originalValue": 0
+    },
+    "user": {
+      "id": 277206218,
+      "firstName": "Mathieu",
+      "lastName": "Lemaire",
+      "address": {
+        "line1": "27 rue du Chemin Vert",
+        "zip": "75011",
+        "city": "Paris",
+        "country": "FR"
+      },
+      "phone": "0664543537",
+      "createdAt": "2016-08-10T08:16:49.000Z",
+      "updatedAt": "2016-08-10T08:16:49.000Z",
+      "email": "mathieu@cubyn.com",
+      "affiliateCode": "Lemaire-8YC16F4"
+    },
+    "collect": {
+      "id": 942069196,
+      "status": "PICKED",
+      "address": {
+        "line1": "27 rue du Chemin Vert",
+        "zip": "75011",
+        "city": "Paris",
+        "country": "FR"
+      },
+      "pickupAt": "2016-09-13T12:00:00.000Z",
+      "messengerType": "2-wheeled",
+      "contactPhone": "0664543537",
+      "contactName": "Lemaire Mathieu",
+      "createdAt": "2016-09-13T15:45:55.000Z",
+      "updatedAt": "2016-09-13T16:10:15.000Z"
+    },
+    "ticket": {
+      "comment": "lambda - damaged parcel"
+    },
+    "fileMap": {
+      "invoices": [],
+      "picturesOfTheDamage": [],
+      "identityParts": [],
+      "certificateOfNonReceipt": [],
+      "senderDisputeDeclaration": [],
+      "others": []
+    }
+  }
+}

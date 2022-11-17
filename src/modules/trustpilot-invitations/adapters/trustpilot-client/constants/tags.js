@@ -1,0 +1,6 @@
+const TAGS = {
+  CLAIM_RESOLUTION: 'CLAIM_RESOLUTION',
+  FRICTIONLESS_48H: 'FRICTIONLESS_48H'
+};
+
+module.exports = { TAGS };

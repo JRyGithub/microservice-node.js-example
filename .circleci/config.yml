@@ -1,0 +1,194 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: cubyn/node:ci-14
+      - image: rabbitmq:3.6-alpine
+        name: broker
+      - image: mysql:5.7.14
+        name: mysql
+        # prod settings
+        command: mysqld --sql-mode="STRICT_TRANS_TABLES"
+        environment:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: service.support
+    steps:
+      - checkout
+      - restore_cache:
+          key: deps-cache-{{ checksum "package.json" }}
+      - run:
+          name: Vendors
+          command: |
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+            make deps
+      - save_cache:
+          key: deps-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+            - ~/.cache/yarn
+            - ~/.cache/Cypress
+      - run:
+          name: Lint
+          command: make lint
+      - run:
+          name: Wait for services
+          command: dockerize -wait tcp://broker:5672 -wait tcp://mysql:3306 -timeout 1m
+
+      - run:
+          name: Tests
+          command: |
+            cp .env.tpl .env.test
+            make test-cover
+          environment:
+            JEST_JUNIT_OUTPUT: '/tmp/test-results/junit.xml'
+      - store_test_results:
+          path: /tmp/test-results
+      - store_artifacts:
+          path: coverage
+
+  docker_lint:
+    docker:
+      - image: hadolint/hadolint:v2.1.0-debian
+    steps:
+      - checkout
+      - run:
+          name: Lint Dockerfile
+          command: hadolint Dockerfile
+
+  build:
+    docker:
+      - image: circleci/buildpack-deps:bionic-scm
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: build and push docker images
+          command: |
+            DK_IMAGE=${REGISTRY}/${GCR_PROJECT}/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            DK_TAG=${CIRCLE_SHA1:0:8}
+            DK_GIT_BRANCH=${CIRCLE_BRANCH//\//_}
+            docker login -u _json_key -p "${GCR_CREDENTIALS}" https://${REGISTRY}
+            docker build -t ${DK_IMAGE}:${DK_TAG} --build-arg NPM_TOKEN=${NPM_TOKEN} .
+            docker tag ${DK_IMAGE}:${DK_TAG} ${DK_IMAGE}:${DK_GIT_BRANCH}
+            docker push ${DK_IMAGE}:${DK_TAG}
+            docker push ${DK_IMAGE}:${DK_GIT_BRANCH}
+            if [ "$CIRCLE_BRANCH" == "master" ]; then
+              docker tag ${DK_IMAGE}:${DK_TAG} ${DK_IMAGE}:latest
+              docker push ${DK_IMAGE}:latest
+            fi
+            if [ -n "$CIRCLE_TAG" ]; then
+              docker tag ${DK_IMAGE}:${DK_TAG} ${DK_IMAGE}:${CIRCLE_TAG}
+              docker push ${DK_IMAGE}:${CIRCLE_TAG}
+            fi
+            docker images
+    environment:
+      REGISTRY: eu.gcr.io
+      GCR_PROJECT: infra-195110
+
+  deploy_staging:
+    docker:
+      - image: cubyn/kubectl:latest
+    steps:
+      - checkout
+      - run:
+          name: deploy staging
+          command: |
+            export KUBERNETES_TOKEN=${KUBERNETES_TOKEN_STAGING}
+            export DEPLOYMENT=${CIRCLE_PROJECT_REPONAME}
+            export CONTAINER=${CIRCLE_PROJECT_REPONAME}
+            export REPO=${REGISTRY}/${GCR_PROJECT}/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            export INIT_CONTAINER_ENABLED=true
+            export TAG=${CIRCLE_SHA1:0:8}
+            deploy.sh
+    environment:
+      REGISTRY: eu.gcr.io
+      GCR_PROJECT: infra-195110
+      KUBERNETES_SERVER: https://kube-preprod.cubyn.com
+      NAMESPACE: preprod
+
+  deploy_sandbox:
+    docker:
+      - image: cubyn/kubectl:latest
+    steps:
+      - checkout
+      - run:
+          name: deploy sandbox
+          command: |
+            export KUBERNETES_TOKEN=${KUBERNETES_TOKEN_SANDBOX}
+            export DEPLOYMENT=${CIRCLE_PROJECT_REPONAME}
+            export CONTAINER=${CIRCLE_PROJECT_REPONAME}
+            export REPO=${REGISTRY}/${GCR_PROJECT}/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            export INIT_CONTAINER_ENABLED=true
+            export TAG=${CIRCLE_SHA1:0:8}
+            deploy.sh
+    environment:
+      REGISTRY: eu.gcr.io
+      GCR_PROJECT: infra-195110
+      KUBERNETES_SERVER: https://kube-preprod.cubyn.com
+      NAMESPACE: sandbox
+
+  deploy_prod:
+    docker:
+      - image: cubyn/kubectl:latest
+    steps:
+      - checkout
+      - run:
+          name: deploy production
+          command: |
+            export KUBERNETES_TOKEN=${KUBERNETES_TOKEN_PROD}
+            export DEPLOYMENT=${CIRCLE_PROJECT_REPONAME}
+            export CONTAINER=${CIRCLE_PROJECT_REPONAME}
+            export REPO=${REGISTRY}/${GCR_PROJECT}/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+            export INIT_CONTAINER_ENABLED=true
+            export TAG=${CIRCLE_SHA1:0:8}
+            deploy.sh
+    environment:
+      REGISTRY: eu.gcr.io
+      GCR_PROJECT: infra-195110
+      KUBERNETES_SERVER: https://kube-prod.cubyn.com
+      NAMESPACE: production
+
+workflows:
+  version: 2
+  'default':
+    jobs:
+      - test:
+          context: cubyn_services
+      - docker_lint
+      - build:
+          context: cubyn_services
+          requires:
+            - test
+            - docker_lint
+          filters:
+            tags:
+              only: /v?\d+\.\d+\.\d+/
+            branches:
+              only:
+                - master
+                - develop
+      - deploy_staging:
+          context: cubyn_services
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+      - deploy_sandbox:
+          context: cubyn_services
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+      - deploy_prod:
+          context: cubyn_services
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
